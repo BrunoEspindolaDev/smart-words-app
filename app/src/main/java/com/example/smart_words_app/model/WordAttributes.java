@@ -8,7 +8,7 @@ public class WordAttributes {
     private String updatedAt;
     private String publishedAt;
 
-    public WordAttributes(String pt, String en, String createdAt, String updatedAt, String publishedAt) {
+    public WordAttributes(String en, String pt, String createdAt, String updatedAt, String publishedAt) {
         this.pt = pt;
         this.en = en;
         this.createdAt = createdAt;
