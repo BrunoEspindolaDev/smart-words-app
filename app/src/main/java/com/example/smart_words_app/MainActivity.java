@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        Collection collection1 = new Collection("1", new CollectionAttributes("Batata", "Potato", "06/06/2023", "06/06/2023", "06/06/2023"));
+        Collection collection1 = new Collection("1", new CollectionAttributes("potato", "Batata", "Potato", "06/06/2023", "06/06/2023", "06/06/2023"));
 
         collectionList.add(collection1);
         collectionList.add(collection1);

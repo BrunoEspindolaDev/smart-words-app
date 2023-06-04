@@ -1,29 +1,19 @@
 package com.example.smart_words_app.model;
 
-public class CollectionAttributes {
+public class WordAttributes {
 
-    private String name;
     private String pt;
     private String en;
     private String createdAt;
     private String updatedAt;
     private String publishedAt;
 
-    public CollectionAttributes(String name, String pt, String en, String createdAt, String updatedAt, String publishedAt) {
-        this.name = name;
+    public WordAttributes(String pt, String en, String createdAt, String updatedAt, String publishedAt) {
         this.pt = pt;
         this.en = en;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.publishedAt = publishedAt;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPt() {
