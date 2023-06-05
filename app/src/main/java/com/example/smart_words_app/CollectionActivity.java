@@ -3,27 +3,24 @@ package com.example.smart_words_app;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-
 import com.example.smart_words_app.adapter.WordAdapter;
 import com.example.smart_words_app.model.Word;
 import com.example.smart_words_app.model.WordAttributes;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
 public class CollectionActivity extends AppCompatActivity {
 
     private Context context;
-
     private TextToSpeech textToSpeech;
     private RecyclerView recyclerView;
     private WordAdapter wordAdapter;
@@ -40,7 +37,7 @@ public class CollectionActivity extends AppCompatActivity {
         String collectionName = intent.getStringExtra("collectionName");
         context = this;
 
-        Button startButton = findViewById(R.id.startButton);
+        ImageButton startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener((c) -> {
             context.startActivity(new Intent(context, QuizActivity.class).putExtra("collectionName", collectionName));
         });
@@ -76,6 +73,7 @@ public class CollectionActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+
         Word word1 = new Word("1", new WordAttributes("Bed", "Cama", "06/06/2023", "06/06/2023", "06/06/2023"));
         Word word2 = new Word("2", new WordAttributes("Bedside Table", "Mesa de cabeceira", "06/06/2023", "06/06/2023", "06/06/2023"));
         Word word3 = new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023"));

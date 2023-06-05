@@ -1,5 +1,8 @@
 package com.example.smart_words_app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Collection {
 
     private String id;

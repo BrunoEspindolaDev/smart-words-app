@@ -10,11 +10,8 @@ public class Question {
     private Word option3;
     private Word correctOption;
 
-    public Question() {
-    }
 
-    public Question(Bitmap image, Word option1, Word option2, Word option3, Word correctOption) {
-        this.image = image;
+    public Question(Word option1, Word option2, Word option3, Word correctOption) {
         this.option1 = option1;
         this.option2 = option2;
         this.option3 = option3;
