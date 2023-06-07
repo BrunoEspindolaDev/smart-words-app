@@ -3,6 +3,7 @@ package com.example.smart_words_app;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,9 +11,12 @@ import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
 import com.example.smart_words_app.adapter.WordAdapter;
 import com.example.smart_words_app.model.Word;
 import com.example.smart_words_app.model.WordAttributes;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -27,21 +31,22 @@ public class CollectionActivity extends AppCompatActivity {
     private List<Word> wordList;
     private Handler handler = new Handler();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
         initializeTextToSpeech();
 
-        Intent intent = getIntent();
-        String collectionName = intent.getStringExtra("collectionName");
+        String collectionName = getIntent().getStringExtra("collectionName");
         context = this;
 
-        ImageButton startButton = findViewById(R.id.startButton);
+        ImageButton startButton = findViewById(R.id.cancelButton);
         startButton.setOnClickListener((c) -> {
-            context.startActivity(new Intent(context, QuizActivity.class).putExtra("collectionName", collectionName));
+            Intent intent = new Intent(context, QuizActivity.class);
+            intent.putExtra("collectionName", collectionName);
+            context.startActivity(intent);
         });
-
 
         recyclerView = findViewById(R.id.recycleViewWords);
         wordList = new ArrayList<>();
@@ -79,22 +84,12 @@ public class CollectionActivity extends AppCompatActivity {
         Word word3 = new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023"));
         Word word4 = new Word("4", new WordAttributes("Lamp", "Luminária", "06/06/2023", "06/06/2023", "06/06/2023"));
         Word word5 = new Word("5", new WordAttributes("Nightstand", "Criado-mudo", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word6 = new Word("6", new WordAttributes("Pillow", "Travesseiro", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word7 = new Word("7", new WordAttributes("Blanket", "Cobertor", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word8 = new Word("8", new WordAttributes("Curtain", "Cortina", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word9 = new Word("9", new WordAttributes("Rug", "Tapete", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word10 = new Word("10", new WordAttributes("Mirror", "Espelho", "06/06/2023", "06/06/2023", "06/06/2023"));
 
         wordList.add(word1);
         wordList.add(word2);
         wordList.add(word3);
         wordList.add(word4);
         wordList.add(word5);
-        wordList.add(word6);
-        wordList.add(word7);
-        wordList.add(word8);
-        wordList.add(word9);
-        wordList.add(word10);
 
         wordAdapter.notifyDataSetChanged();
     }

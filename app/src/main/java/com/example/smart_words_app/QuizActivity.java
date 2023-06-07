@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,10 +25,12 @@ public class QuizActivity extends AppCompatActivity {
     private Context context;
     private int nHits = 0;
     private int nMisses = 0;
-    private int nQuestions = 9;
-    private int nResponses = 1;
+    private int nQuestions = 0;
+    private int nResponses = 0;
     private Question currentQuestion;
-    private List<Word> words = new ArrayList<>();
+    private List<Word> wordList = new ArrayList<>();
+    private List<Word> supportWordList = new ArrayList<>();
+    private ImageButton cancelButton;
     private TextView title;
     private ImageView image;
     private Button option1;
@@ -42,35 +45,21 @@ public class QuizActivity extends AppCompatActivity {
         context = this;
 
         title = findViewById(R.id.title);
+        cancelButton = findViewById(R.id.cancelButton);
         image = findViewById(R.id.image);
         option1 = findViewById(R.id.option1);
         option2 = findViewById(R.id.option2);
         option3 = findViewById(R.id.option3);
 
+        cancelButton.setOnClickListener(e -> {
+            Intent intent = new Intent(context, CollectionActivity.class);
+            context.startActivity(intent);
+        });
+
         title.setText(nResponses + "/" + nQuestions);
 
-        Word word1 = new Word("1", new WordAttributes("Bed", "Cama", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word2 = new Word("2", new WordAttributes("Bedside Table", "Mesa de cabeceira", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word3 = new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word4 = new Word("4", new WordAttributes("Lamp", "Luminária", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word5 = new Word("5", new WordAttributes("Nightstand", "Criado-mudo", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word6 = new Word("6", new WordAttributes("Pillow", "Travesseiro", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word7 = new Word("7", new WordAttributes("Blanket", "Cobertor", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word8 = new Word("8", new WordAttributes("Curtain", "Cortina", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word9 = new Word("9", new WordAttributes("Rug", "Tapete", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word10 = new Word("10", new WordAttributes("Mirror", "Espelho", "06/06/2023", "06/06/2023", "06/06/2023"));
-
-        words.add(word1);
-        words.add(word2);
-        words.add(word3);
-        words.add(word4);
-        words.add(word5);
-        words.add(word6);
-        words.add(word7);
-        words.add(word8);
-        words.add(word9);
-        words.add(word10);
-
+        loadWordList();
+        loadSupportWordList();
         loadQuestion();
 
         option1.setOnClickListener(c -> onOptionClick(currentQuestion.getOption1()));
@@ -79,54 +68,74 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void onOptionClick(Word selectedWord) {
-
         if (currentQuestion.getCorrectOption().getId() == selectedWord.getId()) {
             nHits++;
-            Toast.makeText(context, "Acertou", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(context, "Errou", Toast.LENGTH_LONG).show();
             nMisses++;
-        }
-
-        for (Word word : words) {
-            if (word.getId().equals(selectedWord.getId())) {
-                words.remove(word);
-                break;
-            }
         }
 
         nResponses++;
         title.setText(nResponses + "/" + nQuestions);
 
-        if (nResponses < nQuestions - 1) {
+        if (nResponses < nQuestions) {
             loadQuestion();
         } else {
-            Toast.makeText(context, "Acabou-se o que era doce", Toast.LENGTH_LONG).show();
-            Toast.makeText(context, "x: "+nHits, Toast.LENGTH_LONG).show();
-
             Intent intent = new Intent(context, QuizResultActivity.class);
             intent.putExtra("nHits", nHits);
             intent.putExtra("nMisses", nMisses);
             context.startActivity(intent);
         }
-
-
     }
 
     private void loadQuestion() {
-        List<Word> selectedWords = selectRandomWords(words, 3);
-        Question question = new Question(selectedWords.get(0), selectedWords.get(1), selectedWords.get(2), selectedWords.get(0));
+        Word selectedWord = selectRandomWord(wordList);
+        List<Word> selectedSupportWords = selectRandomWords(supportWordList, 2);
+        Question question = new Question(selectedWord, selectedSupportWords.get(0), selectedSupportWords.get(1), selectedWord);
+
+        removeWordFromList(wordList, selectedWord);
+        removeWordFromList(supportWordList, selectedSupportWords.get(0));
+        removeWordFromList(supportWordList, selectedSupportWords.get(1));
 
         image.setImageResource(R.drawable.ic_launcher_background);
         option1.setText(question.getOption1().getAttributes().getEn());
         option2.setText(question.getOption2().getAttributes().getEn());
         option3.setText(question.getOption3().getAttributes().getEn());
         currentQuestion = question;
-
     }
 
+    private void loadWordList() {
+        wordList.add(new Word("1", new WordAttributes("Bed", "Cama", "06/06/2023", "06/06/2023", "06/06/2023")));
+        wordList.add(new Word("2", new WordAttributes("Bedside Table", "Mesa de cabeceira", "06/06/2023", "06/06/2023", "06/06/2023")));
+        wordList.add(new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023")));
+        wordList.add(new Word("4", new WordAttributes("Lamp", "Luminária", "06/06/2023", "06/06/2023", "06/06/2023")));
+        wordList.add(new Word("5", new WordAttributes("Nightstand", "Criado-mudo", "06/06/2023", "06/06/2023", "06/06/2023")));
+        nQuestions = wordList.size();
+    }
 
-    public List<Word> selectRandomWords(List<Word> words, int numWordsToSelect) {
+    private void loadSupportWordList() {
+        supportWordList.add(new Word("1", new WordAttributes("Desk", "Escrivaninha", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("2", new WordAttributes("Bookshelf", "Estante de livros", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("3", new WordAttributes("Dresser", "Cômoda", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("4", new WordAttributes("Mirror", "Espelho", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("5", new WordAttributes("Curtains", "Cortinas", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("6", new WordAttributes("Armchair", "Poltrona", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("7", new WordAttributes("Dining Table", "Mesa de jantar", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("8", new WordAttributes("China Cabinet", "Cristaleira", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("9", new WordAttributes("Sideboard", "Aparador", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("10", new WordAttributes("Chandelier", "Candelabro", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("11", new WordAttributes("Coffee Table", "Mesa de centro", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("12", new WordAttributes("Shelves", "Prateleiras", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("13", new WordAttributes("Sofa Bed", "Sofá-cama", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("14", new WordAttributes("Dining Chairs", "Cadeiras de jantar", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("15", new WordAttributes("Cabinet", "Armário", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("16", new WordAttributes("Ceiling Fan", "Ventilador de teto", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("17", new WordAttributes("Dresser Mirror", "Espelho da cômoda", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("18", new WordAttributes("Window Blinds", "Persianas", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("19", new WordAttributes("Ottoman", "Pufe", "06/06/2023", "06/06/2023", "06/06/2023")));
+        supportWordList.add(new Word("20", new WordAttributes("Rug", "Tapete", "06/06/2023", "06/06/2023", "06/06/2023")));
+    }
+
+    private List<Word> selectRandomWords(List<Word> words, int numWordsToSelect) {
         List<Word> selectedWords = new ArrayList<>();
         int totalWords = words.size();
         Random random = new Random();
@@ -138,5 +147,17 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         return selectedWords;
+    }
+
+    private Word selectRandomWord(List<Word> words) {
+        int totalWords = words.size();
+        Random random = new Random();
+        int randomIndex = random.nextInt(totalWords);
+        return words.get(randomIndex);
+    }
+
+
+    public static <T> void removeWordFromList(List<T> list, T itemToRemove) {
+        list.remove(itemToRemove);
     }
 }

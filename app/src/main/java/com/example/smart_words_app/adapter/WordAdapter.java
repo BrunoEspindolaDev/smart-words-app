@@ -10,11 +10,17 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
+
 import com.example.smart_words_app.R;
 import com.example.smart_words_app.model.Word;
+
+
+
 
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
 
@@ -50,6 +56,18 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
         return new ViewHolder(v);
     }
 
+    public static void setTimeout(Runnable runnable,int delay){
+        new Thread(()->{
+            try{
+                Thread.sleep(delay);
+                runnable.run();
+            }
+            catch(Exception e){
+                System.err.println(e);
+            }
+        }).start();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Word word = wordList.get(position);
@@ -58,9 +76,12 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
         holder.image.setImageResource(R.drawable.ic_launcher_background);
 
         holder.buttonSpeech.setOnClickListener(c -> {
+            holder.buttonSpeech.setImageResource(R.drawable.soudstart);
             textToSpeech.speak(word.getAttributes().getEn(), TextToSpeech.QUEUE_FLUSH, null);
+            setTimeout(() -> holder.buttonSpeech.setImageResource(R.drawable.sound),800);
         });
     }
+
 
     @Override
     public int getItemCount() {
