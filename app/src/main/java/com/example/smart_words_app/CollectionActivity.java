@@ -9,17 +9,28 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.smart_words_app.adapter.WordAdapter;
+import com.example.smart_words_app.model.Collection;
+import com.example.smart_words_app.model.CollectionResponse;
 import com.example.smart_words_app.model.Word;
 import com.example.smart_words_app.model.WordAttributes;
+import com.example.smart_words_app.model.WordResponse;
+import com.example.smart_words_app.retrofit.RetrofitInitializer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class CollectionActivity extends AppCompatActivity {
@@ -31,6 +42,11 @@ public class CollectionActivity extends AppCompatActivity {
     private List<Word> wordList;
     private Handler handler = new Handler();
 
+    private int collectionId;
+
+    private ProgressBar progressBarWords;
+
+    private TextView nWords;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +55,18 @@ public class CollectionActivity extends AppCompatActivity {
         initializeTextToSpeech();
 
         String collectionName = getIntent().getStringExtra("collectionName");
+        collectionId = getIntent().getIntExtra("collectionId", 0);
         context = this;
-
         ImageButton startButton = findViewById(R.id.cancelButton);
+
         startButton.setOnClickListener((c) -> {
             Intent intent = new Intent(context, QuizActivity.class);
             intent.putExtra("collectionName", collectionName);
+            intent.putExtra("collectionId", collectionId);
             context.startActivity(intent);
         });
 
+        progressBarWords = findViewById(R.id.progressBarWords);
         recyclerView = findViewById(R.id.recycleViewWords);
         wordList = new ArrayList<>();
         wordAdapter = new WordAdapter(context, wordList, textToSpeech);
@@ -57,12 +76,18 @@ public class CollectionActivity extends AppCompatActivity {
         recyclerView.setAdapter(wordAdapter);
 
         TextView title = findViewById(R.id.title);
-        TextView nWords = findViewById(R.id.nWords);
+        nWords = findViewById(R.id.nWords);
+        nWords.setText("0 Palavras");
+
 
         loadData();
 
         title.setText(collectionName);
-        nWords.setText(wordList.size() + " Palavras");
+
+    }
+
+    private void mapElements() {
+
     }
 
     private void initializeTextToSpeech() {
@@ -78,20 +103,29 @@ public class CollectionActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+        progressBarWords.setVisibility(View.VISIBLE);
+        Call<WordResponse> call = new RetrofitInitializer().serviceWord().getWords(collectionId);
 
-        Word word1 = new Word("1", new WordAttributes("Bed", "Cama", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word2 = new Word("2", new WordAttributes("Bedside Table", "Mesa de cabeceira", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word3 = new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word4 = new Word("4", new WordAttributes("Lamp", "Luminária", "06/06/2023", "06/06/2023", "06/06/2023"));
-        Word word5 = new Word("5", new WordAttributes("Nightstand", "Criado-mudo", "06/06/2023", "06/06/2023", "06/06/2023"));
+        call.enqueue(new Callback<WordResponse>() {
+            @Override
+            public void onResponse(Call<WordResponse> call, Response<WordResponse> response) {
+                WordResponse wordResponse = response.body();
 
-        wordList.add(word1);
-        wordList.add(word2);
-        wordList.add(word3);
-        wordList.add(word4);
-        wordList.add(word5);
+                if (wordResponse.getWordList().length > 0) {
+                    for (Word word : wordResponse.getWordList()) {
+                        wordList.add(word);
+                        wordAdapter.notifyDataSetChanged();
+                    }
+                    progressBarWords.setVisibility(View.GONE);
+                    nWords.setText(wordList.size() + " Palavras");
+                }
+            }
 
-        wordAdapter.notifyDataSetChanged();
+            @Override
+            public void onFailure(Call<WordResponse> call, Throwable t) {
+                Toast.makeText(context, "Falha na requisição", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.smart_words_app.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
@@ -14,12 +15,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.Serializable;
 import java.util.List;
 
+import com.example.smart_words_app.CollectionActivity;
+import com.example.smart_words_app.QuizActivity;
 import com.example.smart_words_app.R;
 import com.example.smart_words_app.model.Word;
-
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
@@ -37,14 +40,12 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView title;
         public TextView subtitle;
-        public ImageView image;
         public ImageButton buttonSpeech;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.card_title);
             subtitle = itemView.findViewById(R.id.card_subtitle);
-            image = itemView.findViewById(R.id.card_image);
             buttonSpeech = itemView.findViewById(R.id.buttonSpeech);
         }
     }
@@ -73,9 +74,8 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
         Word word = wordList.get(position);
         holder.title.setText(word.getAttributes().getEn());
         holder.subtitle.setText(word.getAttributes().getPt());
-        holder.image.setImageResource(R.drawable.ic_launcher_background);
 
-        holder.buttonSpeech.setOnClickListener(c -> {
+        holder.itemView.setOnClickListener(c -> {
             holder.buttonSpeech.setImageResource(R.drawable.soudstart);
             textToSpeech.speak(word.getAttributes().getEn(), TextToSpeech.QUEUE_FLUSH, null);
             setTimeout(() -> holder.buttonSpeech.setImageResource(R.drawable.sound),800);

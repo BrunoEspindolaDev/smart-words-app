@@ -1,20 +1,18 @@
 package com.example.smart_words_app.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Word {
+    @JsonProperty("id")
+    private int id;
 
-    private String id;
+    @JsonProperty("attributes")
     private WordAttributes attributes;
 
-    public Word(String id, WordAttributes attributes) {
-        this.id = id;
-        this.attributes = attributes;
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -26,3 +24,4 @@ public class Word {
         this.attributes = attributes;
     }
 }
+

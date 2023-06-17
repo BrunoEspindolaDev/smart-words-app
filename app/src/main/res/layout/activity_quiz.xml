@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:text="1/9"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
 
         <ImageButton
             android:id="@+id/cancelButton"
@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#00FFFFFF"
+            android:contentDescription="cancel"
             android:src="@drawable/cancelbutton" />
 
     </LinearLayout>
@@ -49,52 +50,56 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/lightgray"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="@color/primary"
                 android:paddingStart="20dp"
                 android:paddingTop="40dp"
                 android:paddingEnd="20dp"
                 android:paddingBottom="20dp">
 
-                <ImageView
-                    android:id="@+id/image"
-                    android:layout_width="212dp"
-                    android:layout_height="185dp"
-                    android:src="@drawable/ic_launcher_background" />
-
-                <LinearLayout
-                    android:id="@+id/list_body"
+                <ImageButton
+                    android:id="@+id/buttonRec"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp">
+                    android:layout_height="wrap_content"
+                    android:background="#00FFFFFF"
+                    android:contentDescription="mic"
+                    android:src="@drawable/mic"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.882" />
 
-                    <Button
-                        android:id="@+id/option1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Button" />
+                <TextView
+                    android:id="@+id/ptWord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="100dp"
+                    android:text="TextView"
+                    android:textColor="#FFFFFF"
+                    android:textSize="28sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <Button
-                        android:id="@+id/option2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Button" />
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Traduza a palavra acima utilizando o microfone"
+                    android:textColor="#B5FFFFFF"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ptWord"
+                    app:layout_constraintVertical_bias="0.92" />
 
-                    <Button
-                        android:id="@+id/option3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Button" />
-                </LinearLayout>
-
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
     </LinearLayout>

@@ -1,22 +1,26 @@
 package com.example.smart_words_app.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CollectionAttributes {
 
+    @JsonProperty("name")
     private String name;
-    private String pt;
-    private String en;
-    private String createdAt;
-    private String updatedAt;
-    private String publishedAt;
 
-    public CollectionAttributes(String name, String pt, String en, String createdAt, String updatedAt, String publishedAt) {
-        this.name = name;
-        this.pt = pt;
-        this.en = en;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.publishedAt = publishedAt;
-    }
+    @JsonProperty("pt")
+    private String pt;
+
+    @JsonProperty("en")
+    private String en;
+
+    @JsonProperty("createdAt")
+    private String createdAt;
+
+    @JsonProperty("updatedAt")
+    private String updatedAt;
+
+    @JsonProperty("publishedAt")
+    private String publishedAt;
 
     public String getName() {
         return name;

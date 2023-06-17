@@ -5,19 +5,26 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.smart_words_app.model.Question;
 import com.example.smart_words_app.model.Word;
-import com.example.smart_words_app.model.WordAttributes;
+import com.example.smart_words_app.model.WordResponse;
+import com.example.smart_words_app.retrofit.RetrofitInitializer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class QuizActivity extends AppCompatActivity {
@@ -27,113 +34,166 @@ public class QuizActivity extends AppCompatActivity {
     private int nMisses = 0;
     private int nQuestions = 0;
     private int nResponses = 0;
-    private Question currentQuestion;
+    private Word currentWord;
     private List<Word> wordList = new ArrayList<>();
-    private List<Word> supportWordList = new ArrayList<>();
-    private ImageButton cancelButton;
+    private ImageButton buttonCancel;
     private TextView title;
-    private ImageView image;
-    private Button option1;
-    private Button option2;
-    private Button option3;
+
+    private static final int REQ_CODE_SPEECH_INPUT = 100;
+    private TextView textView;
+    private ImageButton btnSpeak;
+    private SpeechRecognizer speechRecognizer;
+
+    private int collectionId;
+
+    private TextView ptWord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
-
         context = this;
 
-        title = findViewById(R.id.title);
-        cancelButton = findViewById(R.id.cancelButton);
-        image = findViewById(R.id.image);
-        option1 = findViewById(R.id.option1);
-        option2 = findViewById(R.id.option2);
-        option3 = findViewById(R.id.option3);
 
-        cancelButton.setOnClickListener(e -> {
-            Intent intent = new Intent(context, CollectionActivity.class);
-            context.startActivity(intent);
+        collectionId = getIntent().getIntExtra("collectionId", 0);
+
+        mapElements();
+        loadData();
+
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context);
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                // Chamado quando o dispositivo está pronto para iniciar a fala.
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                // Chamado quando a fala foi iniciada.
+                Toast.makeText(context, "xxx", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // Chamado quando há uma alteração no nível de áudio.
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+                // Chamado quando o buffer de áudio é recebido.
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+                // Chamado quando a fala foi concluída.
+            }
+
+            @Override
+            public void onError(int error) {
+                // Chamado em caso de erro durante o reconhecimento de fala.
+                Toast.makeText(context, "teste", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null && !matches.isEmpty()) {
+                    String text = matches.get(0);
+                    Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+                // Chamado quando resultados parciais do reconhecimento de fala estão disponíveis.
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+                // Chamado quando um evento adicional relacionado ao reconhecimento de fala ocorre.
+            }
         });
 
-        title.setText(nResponses + "/" + nQuestions);
+        buttonCancel.setOnClickListener(e -> handleCancel());
 
-        loadWordList();
-        loadSupportWordList();
-        loadQuestion();
+        btnSpeak.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                startSpeechToText();
+                return true; // Retorna true para indicar que o evento de clique longo foi tratado
+            }
+        });
 
-        option1.setOnClickListener(c -> onOptionClick(currentQuestion.getOption1()));
-        option2.setOnClickListener(c -> onOptionClick(currentQuestion.getOption2()));
-        option3.setOnClickListener(c -> onOptionClick(currentQuestion.getOption3()));
+        btnSpeak.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    stopSpeechToText();
+                }
+                return false;
+            }
+        });
     }
 
-    private void onOptionClick(Word selectedWord) {
-        if (currentQuestion.getCorrectOption().getId() == selectedWord.getId()) {
-            nHits++;
-        } else {
-            nMisses++;
-        }
 
-        nResponses++;
-        title.setText(nResponses + "/" + nQuestions);
-
-        if (nResponses < nQuestions) {
-            loadQuestion();
-        } else {
-            Intent intent = new Intent(context, QuizResultActivity.class);
-            intent.putExtra("nHits", nHits);
-            intent.putExtra("nMisses", nMisses);
-            context.startActivity(intent);
-        }
+    private void startSpeechToText() {
+        btnSpeak.setImageResource(R.drawable.recording);
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+        speechRecognizer.startListening(intent);
     }
 
-    private void loadQuestion() {
+    private void stopSpeechToText() {
+        btnSpeak.setImageResource(R.drawable.mic);
+        speechRecognizer.stopListening();
+    }
+
+    private void mapElements() {
+        title = findViewById(R.id.title);
+        buttonCancel = findViewById(R.id.cancelButton);
+        btnSpeak = findViewById(R.id.buttonRec);
+        ptWord = findViewById(R.id.ptWord);
+    }
+
+//    private void handleOptionClick(Word selectedWord) {
+//        if (currentQuestion.getCorrectOption().getId() == selectedWord.getId()) {
+//            nHits++;
+//        } else {
+//            nMisses++;
+//        }
+//
+//        nResponses++;
+//        title.setText(nResponses + "/" + nQuestions);
+//
+//        if (nResponses < nQuestions) {
+//            loadQuestion();
+//        } else {
+//            Intent intent = new Intent(context, QuizResultActivity.class);
+//            intent.putExtra("nHits", nHits);
+//            intent.putExtra("nMisses", nMisses);
+//            context.startActivity(intent);
+//        }
+//    }
+
+    public void handleCancel() {
+        Intent intent = new Intent(context, CollectionActivity.class);
+        context.startActivity(intent);
+    }
+
+    private void loadWord() {
         Word selectedWord = selectRandomWord(wordList);
-        List<Word> selectedSupportWords = selectRandomWords(supportWordList, 2);
-        Question question = new Question(selectedWord, selectedSupportWords.get(0), selectedSupportWords.get(1), selectedWord);
 
-        removeWordFromList(wordList, selectedWord);
-        removeWordFromList(supportWordList, selectedSupportWords.get(0));
-        removeWordFromList(supportWordList, selectedSupportWords.get(1));
-
-        image.setImageResource(R.drawable.ic_launcher_background);
-        option1.setText(question.getOption1().getAttributes().getEn());
-        option2.setText(question.getOption2().getAttributes().getEn());
-        option3.setText(question.getOption3().getAttributes().getEn());
-        currentQuestion = question;
+        if (selectedWord != null) {
+            currentWord = selectedWord;
+            removeWordFromList(wordList, selectedWord);
+            ptWord.setText(selectedWord.getAttributes().getPt());
+        }
     }
 
-    private void loadWordList() {
-        wordList.add(new Word("1", new WordAttributes("Bed", "Cama", "06/06/2023", "06/06/2023", "06/06/2023")));
-        wordList.add(new Word("2", new WordAttributes("Bedside Table", "Mesa de cabeceira", "06/06/2023", "06/06/2023", "06/06/2023")));
-        wordList.add(new Word("3", new WordAttributes("Wardrobe", "Guarda-roupa", "06/06/2023", "06/06/2023", "06/06/2023")));
-        wordList.add(new Word("4", new WordAttributes("Lamp", "Luminária", "06/06/2023", "06/06/2023", "06/06/2023")));
-        wordList.add(new Word("5", new WordAttributes("Nightstand", "Criado-mudo", "06/06/2023", "06/06/2023", "06/06/2023")));
-        nQuestions = wordList.size();
-    }
-
-    private void loadSupportWordList() {
-        supportWordList.add(new Word("1", new WordAttributes("Desk", "Escrivaninha", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("2", new WordAttributes("Bookshelf", "Estante de livros", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("3", new WordAttributes("Dresser", "Cômoda", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("4", new WordAttributes("Mirror", "Espelho", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("5", new WordAttributes("Curtains", "Cortinas", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("6", new WordAttributes("Armchair", "Poltrona", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("7", new WordAttributes("Dining Table", "Mesa de jantar", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("8", new WordAttributes("China Cabinet", "Cristaleira", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("9", new WordAttributes("Sideboard", "Aparador", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("10", new WordAttributes("Chandelier", "Candelabro", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("11", new WordAttributes("Coffee Table", "Mesa de centro", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("12", new WordAttributes("Shelves", "Prateleiras", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("13", new WordAttributes("Sofa Bed", "Sofá-cama", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("14", new WordAttributes("Dining Chairs", "Cadeiras de jantar", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("15", new WordAttributes("Cabinet", "Armário", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("16", new WordAttributes("Ceiling Fan", "Ventilador de teto", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("17", new WordAttributes("Dresser Mirror", "Espelho da cômoda", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("18", new WordAttributes("Window Blinds", "Persianas", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("19", new WordAttributes("Ottoman", "Pufe", "06/06/2023", "06/06/2023", "06/06/2023")));
-        supportWordList.add(new Word("20", new WordAttributes("Rug", "Tapete", "06/06/2023", "06/06/2023", "06/06/2023")));
-    }
 
     private List<Word> selectRandomWords(List<Word> words, int numWordsToSelect) {
         List<Word> selectedWords = new ArrayList<>();
@@ -159,5 +219,38 @@ public class QuizActivity extends AppCompatActivity {
 
     public static <T> void removeWordFromList(List<T> list, T itemToRemove) {
         list.remove(itemToRemove);
+    }
+
+    private void loadData() {
+        Call<WordResponse> call = new RetrofitInitializer().serviceWord().getWords(collectionId);
+
+        call.enqueue(new Callback<WordResponse>() {
+            @Override
+            public void onResponse(Call<WordResponse> call, Response<WordResponse> response) {
+                WordResponse wordResponse = response.body();
+                if (wordResponse.getWordList().length > 0) {
+                    if (wordResponse.getWordList().length > 0) {
+                        for (Word word : wordResponse.getWordList()) {
+                            wordList.add(word);
+                        }
+                    }
+                    title.setText(nResponses + "/" + wordList.size());
+                    loadWord();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WordResponse> call, Throwable t) {
+                Toast.makeText(context, "Falha na requisição", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
     }
 }

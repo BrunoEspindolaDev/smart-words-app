@@ -1,23 +1,18 @@
 package com.example.smart_words_app.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Collection {
+    @JsonProperty("id")
+    private int id;
 
-    private String id;
+    @JsonProperty("attributes")
     private CollectionAttributes attributes;
 
-    public Collection(String id, CollectionAttributes attributes) {
-        this.id = id;
-        this.attributes = attributes;
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -29,3 +24,4 @@ public class Collection {
         this.attributes = attributes;
     }
 }
+

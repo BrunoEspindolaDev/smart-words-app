@@ -53,10 +53,10 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
         holder.title.setText(collection.getAttributes().getEn());
         holder.subtitle.setText(collection.getAttributes().getPt());
 
-
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, CollectionActivity.class);
             intent.putExtra("collectionName", collection.getAttributes().getName());
+            intent.putExtra("collectionId", collection.getId());
             context.startActivity(intent);
         });
     }
