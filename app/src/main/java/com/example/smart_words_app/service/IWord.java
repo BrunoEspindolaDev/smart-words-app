@@ -11,5 +11,5 @@ public interface IWord {
     Call<WordResponse> getWords(@Query("filters[collection][id][$eq]=") int collectionId);
 
     @GET("words")
-    Call<WordResponse> getRandomWords();
+    Call<WordResponse> getRandomWords(@Query("filters[collection][id][$ne]=") int collectionId);
 }

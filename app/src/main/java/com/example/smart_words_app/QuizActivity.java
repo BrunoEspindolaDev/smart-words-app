@@ -110,7 +110,7 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void loadRandomWordList() {
-        Call<WordResponse> call = new RetrofitInitializer().serviceWord().getRandomWords();
+        Call<WordResponse> call = new RetrofitInitializer().serviceWord().getRandomWords(collectionId);
 
         call.enqueue(new Callback<WordResponse>() {
             @Override
