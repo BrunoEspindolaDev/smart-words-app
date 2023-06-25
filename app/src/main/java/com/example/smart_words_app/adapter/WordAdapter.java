@@ -76,7 +76,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
         holder.subtitle.setText(word.getAttributes().getPt());
 
         holder.itemView.setOnClickListener(c -> {
-            holder.buttonSpeech.setImageResource(R.drawable.soudstart);
+            holder.buttonSpeech.setImageResource(R.drawable.soundstart);
             textToSpeech.speak(word.getAttributes().getEn(), TextToSpeech.QUEUE_FLUSH, null);
             setTimeout(() -> holder.buttonSpeech.setImageResource(R.drawable.sound),800);
         });

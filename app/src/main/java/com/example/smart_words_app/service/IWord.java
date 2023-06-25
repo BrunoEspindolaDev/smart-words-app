@@ -9,4 +9,7 @@ import retrofit2.http.Query;
 public interface IWord {
     @GET("words")
     Call<WordResponse> getWords(@Query("filters[collection][id][$eq]=") int collectionId);
+
+    @GET("words")
+    Call<WordResponse> getRandomWords();
 }

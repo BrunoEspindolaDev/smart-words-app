@@ -2,8 +2,10 @@ package com.example.smart_words_app;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,9 +23,12 @@ public class QuizResultActivity extends AppCompatActivity {
     private TextView labelResume;
     private Button buttonFinish;
     private boolean isApproved = false;
+    private String collectionName;
+    private int collectionId;
     private int nHits = 0;
     private int nMisses = 0;
     private double hitPercentage = 0;
+    private SharedPreferences.Editor sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,21 +42,17 @@ public class QuizResultActivity extends AppCompatActivity {
         mapElements();
         afterScreenMount();
 
-        buttonFinish.setOnClickListener(e -> {
-            if (isApproved) {
-                context.startActivity(new Intent(context, MainActivity.class));
-            } else {
-                context.startActivity(new Intent(context, QuizActivity.class));
-            }
-        });
+        buttonFinish.setOnClickListener(e -> handleFinish());
     }
 
-    public void mapIntent() {
+    private void mapIntent() {
         nHits = getIntent().getIntExtra("nHits", 0);
         nMisses = getIntent().getIntExtra("nMisses", 0);
+        collectionName = getIntent().getStringExtra("collectionName");
+        collectionId = getIntent().getIntExtra("collectionId", 0);
     }
 
-    public void mapElements() {
+    private void mapElements() {
         layout = findViewById(R.id.layout);
         labelResume = findViewById(R.id.labelResume);
         labelResultStatus = findViewById(R.id.labelResultStatus);
@@ -61,7 +62,7 @@ public class QuizResultActivity extends AppCompatActivity {
         buttonFinish = findViewById(R.id.buttonFinish);
     }
 
-    public void beforeScreenMount() {
+    private void beforeScreenMount() {
         hitPercentage = ((double) nHits / (nHits + nMisses)) * 100;
 
         if (hitPercentage > 90) {
@@ -73,7 +74,7 @@ public class QuizResultActivity extends AppCompatActivity {
         }
     }
 
-    public void afterScreenMount() {
+    private void afterScreenMount() {
         int danger = ContextCompat.getColor(context, R.color.danger);
         int success = ContextCompat.getColor(context, R.color.success);
 
@@ -86,12 +87,27 @@ public class QuizResultActivity extends AppCompatActivity {
             labelResultStatus.setText("Aprovado");
             labelResume.setText("Parabéns, você completou esta coleção!");
             buttonFinish.setText("Finalizar");
+
+            sharedPreferences = getSharedPreferences("collections", Context.MODE_PRIVATE).edit();
+            sharedPreferences.putBoolean(collectionName, true);
+            sharedPreferences.apply();
         } else {
             layout.setBackgroundColor(danger);
             iconResult.setImageResource(R.drawable.disapproved);
             labelResultStatus.setText("Reprovado");
             labelResume.setText("Opps... Estamos quase lá!\nAinda é necessário reforçar um pouco mais essa coleção.");
             buttonFinish.setText("Reiniciar");
+        }
+    }
+
+    private void handleFinish() {
+        if (isApproved) {
+            context.startActivity(new Intent(context, MainActivity.class));
+        } else {
+            Intent intent = new Intent(context, QuizActivity.class);
+            intent.putExtra("collectionName", collectionName);
+            intent.putExtra("collectionId", collectionId);
+            context.startActivity(intent);
         }
     }
 }

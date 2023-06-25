@@ -3,31 +3,22 @@ package com.example.smart_words_app;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.smart_words_app.adapter.WordAdapter;
-import com.example.smart_words_app.model.Collection;
-import com.example.smart_words_app.model.CollectionResponse;
 import com.example.smart_words_app.model.Word;
-import com.example.smart_words_app.model.WordAttributes;
 import com.example.smart_words_app.model.WordResponse;
 import com.example.smart_words_app.retrofit.RetrofitInitializer;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,54 +31,59 @@ public class CollectionActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private WordAdapter wordAdapter;
     private List<Word> wordList;
-    private Handler handler = new Handler();
-
     private int collectionId;
-
+    private String collectionName;
     private ProgressBar progressBarWords;
-
     private TextView nWords;
+    private ImageButton startButton;
+
+    private TextView title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection);
+        context = this;
+
+        mapIntent();
+        mapElements();
+        hiddeElements();
+
+        title.setText(collectionName);
         initializeTextToSpeech();
 
-        String collectionName = getIntent().getStringExtra("collectionName");
-        collectionId = getIntent().getIntExtra("collectionId", 0);
-        context = this;
-        ImageButton startButton = findViewById(R.id.cancelButton);
+        startButton.setOnClickListener((c) -> handlePratice());
 
-        startButton.setOnClickListener((c) -> {
-            Intent intent = new Intent(context, QuizActivity.class);
-            intent.putExtra("collectionName", collectionName);
-            intent.putExtra("collectionId", collectionId);
-            context.startActivity(intent);
-        });
-
-        progressBarWords = findViewById(R.id.progressBarWords);
-        recyclerView = findViewById(R.id.recycleViewWords);
         wordList = new ArrayList<>();
         wordAdapter = new WordAdapter(context, wordList, textToSpeech);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(wordAdapter);
-
-        TextView title = findViewById(R.id.title);
-        nWords = findViewById(R.id.nWords);
-        nWords.setText("0 Palavras");
-
-
         loadData();
+    }
 
-        title.setText(collectionName);
-
+    private void mapIntent() {
+        collectionId = getIntent().getIntExtra("collectionId", 0);
+        collectionName = getIntent().getStringExtra("collectionName");
     }
 
     private void mapElements() {
+        progressBarWords = findViewById(R.id.progressBarWords);
+        recyclerView = findViewById(R.id.recycleViewWords);
+        startButton = findViewById(R.id.buttonCancel);
+        nWords = findViewById(R.id.nWords);
+        title = findViewById(R.id.labelProgress);
+    }
 
+    private void hiddeElements(){
+        progressBarWords.setVisibility(View.VISIBLE);
+        nWords.setVisibility(View.GONE);
+    }
+
+    private void showElements(){
+        progressBarWords.setVisibility(View.GONE);
+        nWords.setVisibility(View.VISIBLE);
     }
 
     private void initializeTextToSpeech() {
@@ -103,7 +99,7 @@ public class CollectionActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        progressBarWords.setVisibility(View.VISIBLE);
+
         Call<WordResponse> call = new RetrofitInitializer().serviceWord().getWords(collectionId);
 
         call.enqueue(new Callback<WordResponse>() {
@@ -116,8 +112,8 @@ public class CollectionActivity extends AppCompatActivity {
                         wordList.add(word);
                         wordAdapter.notifyDataSetChanged();
                     }
-                    progressBarWords.setVisibility(View.GONE);
                     nWords.setText(wordList.size() + " Palavras");
+                    showElements();
                 }
             }
 
@@ -126,6 +122,13 @@ public class CollectionActivity extends AppCompatActivity {
                 Toast.makeText(context, "Falha na requisição", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void handlePratice() {
+        Intent intent = new Intent(context, QuizActivity.class);
+        intent.putExtra("collectionName", collectionName);
+        intent.putExtra("collectionId", collectionId);
+        context.startActivity(intent);
     }
 
 

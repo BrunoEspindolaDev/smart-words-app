@@ -16,7 +16,7 @@
         android:paddingEnd="20dp">
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/labelProgress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -25,7 +25,7 @@
             android:textSize="18sp" />
 
         <ImageButton
-            android:id="@+id/cancelButton"
+            android:id="@+id/buttonCancel"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
